@@ -71,6 +71,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libasound2t64 \
         # Process utilities
         procps \
+        # Text editor
+        nano \
+        # Allow the runtime user to install extra packages
+        sudo \
     && rm -rf /var/lib/apt/lists/*
 
 # ---- Google Chrome (stable) —— required for browser-automation tool ---------
@@ -92,7 +96,10 @@ COPY config/config.toml.example /etc/zeroclaw/config.toml.example
 # ---- Runtime user & directories ---------------------------------------------
 RUN useradd --create-home --uid 1000 --shell /bin/bash zeroclaw \
     && mkdir -p /zeroclaw-data/workspace /zeroclaw-data/.zeroclaw \
-    && chown -R zeroclaw:zeroclaw /zeroclaw-data
+    && chown -R zeroclaw:zeroclaw /zeroclaw-data \
+    && echo "zeroclaw ALL=(ALL) NOPASSWD: /usr/bin/apt-get, /usr/bin/apt" \
+        > /etc/sudoers.d/zeroclaw-apt \
+    && chmod 0440 /etc/sudoers.d/zeroclaw-apt
 
 USER zeroclaw
 WORKDIR /zeroclaw-data
