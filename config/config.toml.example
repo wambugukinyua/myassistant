@@ -1,0 +1,56 @@
+# myassistant — zeroclaw configuration
+# Copy this file to /zeroclaw-data/.zeroclaw/config.toml (or mount it as a
+# read-only volume) and fill in your credentials.
+#
+# Reference: https://github.com/zeroclaw-labs/zeroclaw
+
+# ── Agent behaviour ────────────────────────────────────────────────────────────
+[agent]
+# System prompt that shapes the assistant's personality / instructions
+system_prompt = """
+You are myassistant, a helpful personal AI assistant.
+You can browse the web, take screenshots, run OCR, and help with everyday tasks.
+"""
+# Maximum reasoning loop iterations before giving up on a task
+max_iterations = 20
+
+# ── LLM provider ──────────────────────────────────────────────────────────────
+[provider]
+# Supported: openai, anthropic, gemini, openrouter, groq, deepseek, ollama
+name = "openai"
+model = "gpt-4o"
+# API key is read from the API_KEY environment variable; you can also hardcode:
+# api_key = "sk-..."
+
+# ── Gateway ───────────────────────────────────────────────────────────────────
+[gateway]
+port = 42617
+# Public HTTPS base URL used for WhatsApp webhook registration:
+# public_url = "https://myassistant.example.com"
+
+# ── WhatsApp channel (enabled by default) ─────────────────────────────────────
+[channels_config.whatsapp]
+# --- Cloud API mode (recommended for production) ---
+# Obtain these from your Meta for Developers account:
+access_token     = ""   # set via WHATSAPP_ACCESS_TOKEN env var or here
+phone_number_id  = ""   # set via WHATSAPP_PHONE_NUMBER_ID env var or here
+verify_token     = ""   # set via WHATSAPP_VERIFY_TOKEN env var or here
+app_secret       = ""   # optional — set via WHATSAPP_APP_SECRET env var or here
+
+# "*" allows messages from any phone number; list specific numbers to restrict.
+allowed_numbers = ["*"]
+
+# --- WhatsApp Web mode (local / no Meta account required) ---
+# Uncomment the block below and comment out the Cloud API block above to use
+# the WhatsApp Web client instead (requires the image built with
+# ZEROCLAW_CARGO_FEATURES="whatsapp-web").
+#
+# [channels_config.whatsapp_web]
+# session_path   = "/zeroclaw-data/.zeroclaw/whatsapp-web-session.db"
+# pair_phone     = ""   # leave blank to display a QR code in the logs
+# allowed_numbers = ["*"]
+
+# ── Persistence ───────────────────────────────────────────────────────────────
+[storage]
+# SQLite database file (relative to ZEROCLAW_WORKSPACE)
+sqlite_path = "zeroclaw.db"

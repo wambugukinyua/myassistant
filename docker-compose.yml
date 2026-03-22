@@ -1,0 +1,67 @@
+# myassistant — docker-compose for local development / self-hosted deployment
+# Copy .env.example to .env and fill in your secrets before running.
+#
+# Usage:
+#   docker compose up -d
+#   docker compose logs -f myassistant
+
+services:
+  myassistant:
+    image: ghcr.io/wambugukinyua/myassistant:latest
+    # Build locally when the ghcr.io image is not yet available:
+    # build:
+    #   context: .
+    #   args:
+    #     ZEROCLAW_VERSION: v0.5.7
+    #     ZEROCLAW_CARGO_FEATURES: "whatsapp-web"
+    container_name: myassistant
+    restart: unless-stopped
+
+    ports:
+      - "42617:42617"   # zeroclaw gateway / webhook receiver
+
+    environment:
+      # ── LLM provider (required) ─────────────────────────────────────────────
+      PROVIDER: ${PROVIDER:-openai}
+      ZEROCLAW_MODEL: ${ZEROCLAW_MODEL:-gpt-4o}
+      API_KEY: ${API_KEY}
+
+      # ── WhatsApp Cloud API (required for webhook-based WhatsApp) ─────────────
+      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN:-}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-}
+      WHATSAPP_APP_SECRET: ${WHATSAPP_APP_SECRET:-}
+
+      # ── Runtime paths ────────────────────────────────────────────────────────
+      ZEROCLAW_WORKSPACE: /zeroclaw-data/workspace
+      ZEROCLAW_GATEWAY_PORT: 42617
+      ZEROCLAW_CHANNELS: whatsapp
+
+      # ── Display (needed by scrot / browser tools) ────────────────────────────
+      DISPLAY: ":99"
+
+    volumes:
+      # Persist conversation state, skills and WhatsApp Web session
+      - zeroclaw-data:/zeroclaw-data
+      # Mount your own config to override defaults:
+      # - ./config/config.toml:/zeroclaw-data/.zeroclaw/config.toml:ro
+
+    # Virtual frame buffer for headless Chrome / scrot
+    # (Remove if you do not need browser-automation or screenshot tools)
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        Xvfb :99 -screen 0 1280x1024x24 &
+        exec zeroclaw gateway
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:42617/"]
+      interval: 60s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
+
+volumes:
+  zeroclaw-data:
+    driver: local
