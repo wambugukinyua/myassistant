@@ -6,7 +6,7 @@
 # -----------------------------------------------------------------------------
 # Stage 1: Build zeroclaw from source with WhatsApp-web support
 # -----------------------------------------------------------------------------
-FROM rust:1.87-slim AS builder
+FROM rust:1.89-slim AS builder
 
 WORKDIR /zeroclaw
 
