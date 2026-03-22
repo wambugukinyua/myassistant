@@ -34,7 +34,7 @@ RUN strip target/release/zeroclaw
 # -----------------------------------------------------------------------------
 # Stage 2: Runtime image with all tools zeroclaw needs
 # -----------------------------------------------------------------------------
-FROM debian:bookworm-slim AS runtime
+FROM debian:trixie-slim AS runtime
 
 # ---- Base utilities & zeroclaw tool dependencies ----------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -68,7 +68,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libxfixes3 \
         libxrandr2 \
         libxtst6 \
-        libasound2 \
+        libasound2t64 \
         # Process utilities
         procps \
     && rm -rf /var/lib/apt/lists/*
