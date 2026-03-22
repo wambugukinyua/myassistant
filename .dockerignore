@@ -1,0 +1,26 @@
+# Build context excludes
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Editor / OS artefacts
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Cargo / Rust (only relevant when building locally outside Docker)
+target/
+Cargo.lock
+
+# CI
+.github/
+
+# Docs / README (not needed in the image)
+*.md
