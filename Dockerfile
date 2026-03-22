@@ -87,6 +87,27 @@ RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
     && apt-get install -y --no-install-recommends google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
+# ---- Python 3 runtime + build tools ----------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 \
+        python3-pip \
+        python3-venv \
+        python3-dev \
+        # needed to compile some Python C-extensions (e.g. numpy, lxml)
+        build-essential \
+        libffi-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---- Python libraries for the AI agent --------------------------------------
+# Versions are pinned in requirements.txt for reproducible builds.
+# Using --break-system-packages is intentional: this is a container image and
+# we want packages available system-wide without a virtual-env wrapper.
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt
+
 # ---- Copy zeroclaw binary from builder --------------------------------------
 COPY --from=builder /zeroclaw/target/release/zeroclaw /usr/local/bin/zeroclaw
 

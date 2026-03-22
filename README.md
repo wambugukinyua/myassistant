@@ -7,7 +7,18 @@ A personal AI assistant powered by the [zeroclaw](https://github.com/zeroclaw-la
 - 🤖 **zeroclaw** agent runtime with full tool support (web search, screenshot, OCR, PDF extraction, browser automation)
 - 💬 **WhatsApp** enabled by default (Cloud API and WhatsApp Web modes)
 - 🌐 **Google Chrome** + **scrot** + **Xvfb** for headless browser and screenshot tools
+- 🐍 **Python 3** with a rich set of pre-installed libraries for data analysis, HTTP, AI/LLM SDKs and more (see below)
 - 📦 Published to **`ghcr.io/wambugukinyua/myassistant`** via GitHub Actions on every push to `main`
+
+### Python library suite
+
+| Category | Packages |
+|---|---|
+| **HTTP & web-scraping** | `requests`, `httpx[http2]`, `aiohttp`, `websocket-client`, `beautifulsoup4`, `lxml` |
+| **Data analysis & science** | `numpy`, `pandas`, `scipy`, `matplotlib`, `seaborn`, `statsmodels`, `scikit-learn`, `pyarrow`, `openpyxl`, `tabulate` |
+| **AI / LLM SDKs** | `openai`, `anthropic`, `tiktoken` |
+| **Config, validation & utilities** | `python-dotenv`, `pydantic`, `rich`, `tqdm`, `tenacity` |
+| **Image handling** | `Pillow` |
 
 ---
 
