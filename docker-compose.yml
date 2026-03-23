@@ -19,6 +19,7 @@ services:
 
     ports:
       - "42617:42617"   # zeroclaw gateway / webhook receiver
+      - "${FILEBROWSER_PORT:-8080}:8080"  # FileBrowser web UI
 
     environment:
       # ── LLM provider (required) ─────────────────────────────────────────────
@@ -40,6 +41,13 @@ services:
       # ── Display (needed by scrot / browser tools) ────────────────────────────
       DISPLAY: ":99"
 
+      # ── FileBrowser ──────────────────────────────────────────────────────────
+      # Admin credentials for the FileBrowser web UI.
+      # Set these before the first run; they are written into the database once
+      # and are not updated on subsequent container restarts.
+      FILEBROWSER_ADMIN_USER: ${FILEBROWSER_ADMIN_USER:-admin}
+      FILEBROWSER_ADMIN_PASSWORD: ${FILEBROWSER_ADMIN_PASSWORD:-admin}
+
     volumes:
       # Persist conversation state, skills and WhatsApp Web session
       - zeroclaw-data:/zeroclaw-data
@@ -52,7 +60,29 @@ services:
       - /bin/bash
       - -c
       - |
+        # ── Virtual frame buffer (headless Chrome / scrot) ──────────────────
         Xvfb :99 -screen 0 1280x1024x24 &
+
+        # ── FileBrowser ──────────────────────────────────────────────────────
+        # Initialise the database on first run so credentials are persisted
+        # across container restarts (stored in the zeroclaw-data volume).
+        _FB_DB=/zeroclaw-data/.filebrowser.db
+        _FB_USER="${FILEBROWSER_ADMIN_USER:-admin}"
+        _FB_PASS="${FILEBROWSER_ADMIN_PASSWORD:-admin}"
+        if [ ! -f "${_FB_DB}" ]; then
+          filebrowser config init    --database "${_FB_DB}"
+          filebrowser config set     --database "${_FB_DB}" \
+            --address 0.0.0.0 --port 8080 --root /zeroclaw-data
+          # Credentials are set via FILEBROWSER_ADMIN_USER / FILEBROWSER_ADMIN_PASSWORD.
+          # Set these in your .env file before first run. Change them immediately
+          # in the UI or with:
+          #   docker exec -it myassistant filebrowser users update <user> \
+          #     --password <new-password> --database /zeroclaw-data/.filebrowser.db
+          filebrowser users add "${_FB_USER}" "${_FB_PASS}" \
+            --perm.admin --database "${_FB_DB}"
+        fi
+        filebrowser --database "${_FB_DB}" &
+
         exec zeroclaw gateway
 
     healthcheck:
