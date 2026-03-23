@@ -108,6 +108,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt
 
+# ---- FileBrowser (web-based file manager on port 8080) ----------------------
+# Download a pinned release directly from GitHub — avoids piping to bash.
+# Override the version at build time with --build-arg FILEBROWSER_VERSION=...
+ARG FILEBROWSER_VERSION=v2.32.0
+RUN set -eux; \
+    ARCH="$(dpkg --print-architecture)"; \
+    case "${ARCH}" in \
+        amd64) FB_ARCH="linux-amd64" ;; \
+        arm64) FB_ARCH="linux-arm64" ;; \
+        *) echo "Unsupported architecture: ${ARCH}" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL -o /tmp/filebrowser.tar.gz \
+        "https://github.com/filebrowser/filebrowser/releases/download/${FILEBROWSER_VERSION}/${FB_ARCH}-filebrowser.tar.gz"; \
+    tar -xzf /tmp/filebrowser.tar.gz -C /usr/local/bin filebrowser; \
+    chmod +x /usr/local/bin/filebrowser; \
+    rm /tmp/filebrowser.tar.gz
+
 # ---- Copy zeroclaw binary from builder --------------------------------------
 COPY --from=builder /zeroclaw/target/release/zeroclaw /usr/local/bin/zeroclaw
 
@@ -136,8 +153,11 @@ ENV ZEROCLAW_CHANNELS=whatsapp
 # ENV ZEROCLAW_MODEL=gpt-4o
 # ENV API_KEY=sk-...
 
-# ---- Expose the zeroclaw gateway port ---------------------------------------
+# ---- Expose ports -----------------------------------------------------------
+# 42617 — zeroclaw gateway / webhook receiver
+# 8080  — FileBrowser web UI (browse & edit files in /zeroclaw-data)
 EXPOSE 42617
+EXPOSE 8080
 
 # ---- Health check -----------------------------------------------------------
 # curl is available in this image; hits the gateway's HTTP root to confirm
@@ -146,4 +166,7 @@ HEALTHCHECK --interval=60s --timeout=10s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:42617/ || exit 1
 
 # ---- Default command --------------------------------------------------------
+# NOTE: docker-compose overrides this with an entrypoint that also starts
+# Xvfb and FileBrowser.  The CMD here is used only when the image is run
+# directly (e.g. docker run …).
 CMD ["zeroclaw", "daemon"]
