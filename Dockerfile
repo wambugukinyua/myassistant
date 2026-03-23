@@ -146,4 +146,4 @@ HEALTHCHECK --interval=60s --timeout=10s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:42617/ || exit 1
 
 # ---- Default command --------------------------------------------------------
-CMD ["zeroclaw", "gateway"]
+CMD ["zeroclaw", "daemon"]
