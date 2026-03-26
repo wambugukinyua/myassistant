@@ -48,6 +48,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         imagemagick \
         xvfb \
         x11-apps \
+        # Audio/video processing
+        ffmpeg \
         # OCR support
         tesseract-ocr \
         # PDF extraction
