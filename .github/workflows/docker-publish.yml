@@ -23,9 +23,9 @@ on:
   workflow_dispatch:
     inputs:
       zeroclaw_version:
-        description: "zeroclaw release tag to build (e.g. v0.5.7)"
+        description: "zeroclaw release tag to build (e.g. v0.7.3)"
         required: false
-        default: "v0.5.7"
+        default: "v0.7.3"
       extra_features:
         description: "Additional Cargo features (comma-separated)"
         required: false
@@ -87,7 +87,7 @@ jobs:
       - name: Resolve build arguments
         id: build_args
         run: |
-          VERSION="${{ github.event.inputs.zeroclaw_version || 'v0.5.7' }}"
+          VERSION="${{ github.event.inputs.zeroclaw_version || 'v0.7.3' }}"
           EXTRA="${{ github.event.inputs.extra_features }}"
           FEATURES="whatsapp-web"
           if [[ -n "$EXTRA" ]]; then

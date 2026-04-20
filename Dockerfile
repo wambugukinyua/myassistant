@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Pin to a stable zeroclaw release; override with --build-arg ZEROCLAW_VERSION=...
-ARG ZEROCLAW_VERSION=v0.5.7
+ARG ZEROCLAW_VERSION=v0.7.3
 
 RUN git clone --depth 1 --branch "${ZEROCLAW_VERSION}" \
         https://github.com/zeroclaw-labs/zeroclaw.git .

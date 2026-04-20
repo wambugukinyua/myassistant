@@ -116,7 +116,7 @@ See `.env.example` and `config/config.toml.example` for the full list.
 
 ```bash
 docker build \
-  --build-arg ZEROCLAW_VERSION=v0.5.7 \
+  --build-arg ZEROCLAW_VERSION=v0.7.3 \
   --build-arg ZEROCLAW_CARGO_FEATURES="whatsapp-web" \
   -t myassistant:local .
 ```
