@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Pin to a stable zeroclaw release; override with --build-arg ZEROCLAW_VERSION=...
-ARG ZEROCLAW_VERSION=v0.5.7
+ARG ZEROCLAW_VERSION=v0.7.3
 
 RUN git clone --depth 1 --branch "${ZEROCLAW_VERSION}" \
         https://github.com/zeroclaw-labs/zeroclaw.git .
@@ -79,15 +79,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         sudo \
     && rm -rf /var/lib/apt/lists/*
 
-# ---- Google Chrome (stable) —— required for browser-automation tool ---------
-RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
-        | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg \
-    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] \
-             https://dl.google.com/linux/chrome/deb/ stable main" \
-        > /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
+# ---- Chromium —— required for browser-automation tool -----------------------
+# Use Debian's own Chromium package instead of the Google-hosted apt source;
+# this avoids any external DNS/network dependency at build time and works
+# on both amd64 and arm64 without architecture guards.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        chromium \
+        chromium-sandbox \
+    && rm -rf /var/lib/apt/lists/* \
+    # Provide a `google-chrome` shim so tools that invoke Chrome by that name
+    # (e.g. Playwright default launch path) continue to work unchanged.
+    && ln -sf /usr/bin/chromium /usr/local/bin/google-chrome
 
 # ---- Python 3 runtime + build tools ----------------------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -12,7 +12,7 @@ services:
     # build:
     #   context: .
     #   args:
-    #     ZEROCLAW_VERSION: v0.5.7
+    #     ZEROCLAW_VERSION: v0.7.3
     #     ZEROCLAW_CARGO_FEATURES: "whatsapp-web"
     container_name: myassistant
     restart: unless-stopped
